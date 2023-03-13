@@ -51,8 +51,7 @@ class Tree:
 df = pd.read_csv('market_data.csv')
 df_train = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][:int(len(df)*0.8)]
 df_test = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][int(len(df)*0.8):].values.tolist()
-wtf1 = np.array(df_train[:10])
-print(wtf1)
-print(wtf1[:,-1:])
-# test = Tree(df_train)
-# print(test.root.left_child)
+
+wtf2 = np.array_split(np.array(df_train[:10]),5)
+test = [el for indx,el in enumerate(wtf2) if indx < 3]
+print(wtf2)
