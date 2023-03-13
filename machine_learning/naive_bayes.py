@@ -4,7 +4,6 @@ import math
 
 def calculate_r_values(train_data,feature,features):
     train_data = pd.DataFrame(train_data,columns=[*features,'target'])
-    print(train_data)
     #split into two datasets, positive examples and negative examples
     p_exmp, n_exmp = train_data[train_data['target']==1], train_data[train_data['target']==0]
     #compute the R values for each combination feature-outcome; Laplace correction
@@ -24,6 +23,8 @@ def handle_score_computations(row,scores,is_positive):
     return score
 
 def cross_valiadtion(scores,test_data):
+    # print(test_data.shape)
+    # print(type(test_data))
     right_answers = 0
     for el in test_data:
         score_positive = handle_score_computations(el,scores,True)
@@ -40,16 +41,15 @@ def cross_valiadtion(scores,test_data):
 df = pd.read_csv('market_data.csv')[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']]
 features = list(df.columns)[:-1]
 df = np.array_split(np.array(df),10)
-
-error_term = 0
+correct_predictions = 0
 
 for i in range(len(df)):
     #using list-comprehensions and numpy.concatenate in order to cross-validate and get an average idea of the error term
     df_train = np.concatenate([el for indx,el in enumerate(df) if indx != i])
-    df_test = np.array([el for indx,el in enumerate(df) if indx == i])
+    df_test = np.array(*[el for indx,el in enumerate(df) if indx == i])
     scores = {feature:calculate_r_values(df_train,feature,features) for feature in features}
-    error_term += cross_valiadtion(scores,df_test)
+    correct_predictions += cross_valiadtion(scores,df_test)
 
-error_term /= len(df)
-print(error_term)
+correct_predictions /= len(df)
+print(f'Average error = {(1 - correct_predictions)*100:.2f}% => {correct_predictions*100:.2f}% correct predictions')
 
