@@ -25,7 +25,7 @@ df = pd.read_csv('market_data.csv')
 df_train = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][:int(len(df)*0.85)]
 df_test = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][int(len(df)*0.85):].values.tolist()
 
-def cross_valiadtion():
+def cross_valiadtion(scores):
     right_answers = 0
     for el in df_test:
         score_positive = handle_score_computations(el,scores,True)
@@ -35,9 +35,9 @@ def cross_valiadtion():
         if expected == actual:
             right_answers += 1
     right_answers /= len(df_test)
-    print(f'{right_answers*100:.2f}', '%')
+    print(f'{int(right_answers*100)}% accuracy in predicting D2 column')
 
 features = list(df_train.columns)[:-1]
 scores = {feature:calculate_r_values(df_train,feature) for feature in features}
 
-cross_valiadtion()
+cross_valiadtion(scores)

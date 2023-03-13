@@ -1,5 +1,6 @@
 import math
 import pandas as pd
+import numpy as np
 
 class Node:
     def __init__(self,feature=None,left=None,right=None,value=None):
@@ -30,7 +31,7 @@ class Tree:
             n_entropy = calculate_entropy(n_exmp)
             avg_entropy = len(p_exmp)/len(df)*p_entropy + len(n_exmp)/len(df)*n_entropy
             entropyes[el] = avg_entropy
-
+        #fix this so it gets a random feature if more than one min features.
         return sorted(entropyes.items(),key=lambda x: x[1])[0][0]
 
     def buld_tree(self,df):
@@ -50,6 +51,8 @@ class Tree:
 df = pd.read_csv('market_data.csv')
 df_train = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][:int(len(df)*0.8)]
 df_test = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][int(len(df)*0.8):].values.tolist()
-print(df)
+wtf1 = np.array(df_train[:10])
+print(wtf1)
+print(wtf1[:,-1:])
 # test = Tree(df_train)
 # print(test.root.left_child)
