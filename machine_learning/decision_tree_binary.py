@@ -29,24 +29,24 @@ class Tree:
         self.right_child = Tree(p_best).build_tree(p_subset)
 
     @staticmethod
-    def pick_best_feature(df_all):
+    def pick_best_feature(df):
 
-        def calculate_entropy(df_all):
-            p = len(df_all[df_all[df_all.columns[-1]]==1])/len(df_all)
+        def calculate_entropy(df_filtered):
+            p = len(df_filtered[df_filtered[df_filtered.columns[-1]]==1])/len(df_filtered)
             entropy = - p*math.log(p+0.000001,2) - (1-p)*math.log((1-p)+0.000001,2)
             return entropy
     
         entropyes = {}
     
-        for el in list(df_all.columns)[:-1]:
+        for col in list(df.columns)[:-1]:
             #calculate dependent variable entropy for explanatory feature being possitive/negative
-            p_exmp = df_all[df_all[el]==1]
-            n_exmp = df_all[df_all[el]==0]
+            p_exmp = df[df[col]==1]
+            n_exmp = df[df[col]==0]
             p_entropy = calculate_entropy(p_exmp) 
             n_entropy = calculate_entropy(n_exmp)
-            p = len(p_exmp)/len(df_all)
+            p = len(p_exmp)/len(df)
             avg_entropy = p*p_entropy + (1-p)*n_entropy
-            entropyes[el] = avg_entropy
+            entropyes[col] = avg_entropy
         #fix this so it gets a random feature if more than one min features.
         print(entropyes)
         return sorted(entropyes.items(),key=lambda x: x[1])[0][0]
