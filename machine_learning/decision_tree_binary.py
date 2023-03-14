@@ -15,14 +15,14 @@ class Tree:
     def build_tree(self,df):
         y_val = df.columns[-1]
         # p- positive, n- negative
+        #conditions to make leaf node
         if len(df[y_val].unique())==1:
-            #make leaf node
             self.value = df[y_val].unique()[0]
             return
-        if len(df)<=20 and len(df[df[y_val]==0])!=len(df[df[y_val]==1]):
+        if len(df)<=50 and len(df[df[y_val]==0])!=len(df[df[y_val]==1]):
             self.value = sorted(df[y_val].value_counts().idxmax())
             return
-        if len(df)<=20:
+        if len(df)<=50:
             self.value = 0
             return
         n_subset = df[df[self.feature]==0]
@@ -36,8 +36,10 @@ class Tree:
     def pick_best_feature(df,previos_best):
 
         def calculate_entropy(df_filtered):
+            #p- proportion of y-values equal to 1 comapred to all y-values
             p = len(df_filtered[df_filtered[df_filtered.columns[-1]]==1])/len(df_filtered) if len(df_filtered)!=0 else 0
-            entropy = - p*math.log(p+0.000001,2) - (1-p)*math.log((1-p)+0.000001,2)
+            small = 0.000000000000001
+            entropy = - p*math.log(p+small,2) - (1-p)*math.log((1-p)+small,2)
             return entropy
     
         entropyes = {}
@@ -46,15 +48,19 @@ class Tree:
             #calculate dependent variable entropy for explanatory feature being possitive/negative
             if col == previos_best:
                 continue
-            p_exmp = df[df[col]==1]
-            n_exmp = df[df[col]==0]
-            p_entropy = calculate_entropy(p_exmp) 
-            n_entropy = calculate_entropy(n_exmp)
-            p = len(p_exmp)/len(df) if len(p_exmp)!=0 else 1/2
-            avg_entropy = p*p_entropy + (1-p)*n_entropy
+            elif col != previos_best and len(df[col].unique())>1:
+                p_exmp = df[df[col]==1]
+                n_exmp = df[df[col]==0]
+                p_entropy = calculate_entropy(p_exmp) 
+                n_entropy = calculate_entropy(n_exmp)
+                p = len(p_exmp)/len(df) if len(p_exmp)!=0 else 0
+                avg_entropy = p*p_entropy + (1-p)*n_entropy
+                # if avg_entropy <= 0:
+                #     quit()
+            else:
+                avg_entropy = calculate_entropy(df)
             entropyes[col] = avg_entropy
         #fix this so it gets a random feature if more than one min features.
-        print(entropyes)
         return sorted(entropyes.items(),key=lambda x: x[1])[0][0]
 
 
@@ -69,7 +75,7 @@ def test():
     root.build_tree(df_train)
     print(root.__class__)
     print(root.left_child.feature)
-
+    print('wazaa')
 test()
 
 
