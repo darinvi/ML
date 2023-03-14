@@ -10,7 +10,6 @@ class Tree:
         self.value = value
         self.left_child = None
         self.right_child = None
-        Tree.used_features.appendleft(self.feature)    
 
     def build_tree(self,df):
         y_val = df.columns[-1]
