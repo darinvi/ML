@@ -2,11 +2,8 @@ import pdb
 import math
 import pandas as pd
 import numpy as np
-from collections import deque
 
 class Tree:
-
-    used_features = deque([])
 
     def __init__(self,feature,value=None):
         self.feature = feature
