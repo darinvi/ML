@@ -13,10 +13,14 @@ class Tree:
         Tree.used_features.appendleft(self.feature)    
 
     def build_tree(self,df):
+        y_val = df.columns[-1]
         # p- positive, n- negative
-        if len(df[df.columns[-1]].unique())==1:
+        if len(df[y_val].unique())==1:
             #make leaf node
-            self.value = df[df.columns[-1]].unique()[0]
+            self.value = df[y_val].unique()[0]
+            return
+        if len(df)<=20 and len(df[df[y_val]==0])!=len(df[df[y_val]==1]):
+            self.value = sorted(df[y_val].value_counts().idxmax())
             return
         n_subset = df[df[self.feature]==0]
         p_subset = df[df[self.feature]==1]
@@ -37,14 +41,13 @@ class Tree:
     
         for el in list(df_all.columns)[:-1]:
             #calculate dependent variable entropy for explanatory feature being possitive/negative
-            if el not in Tree.used_features:
-                p_exmp = df_all[df_all[el]==1]
-                n_exmp = df_all[df_all[el]==0]
-                p_entropy = calculate_entropy(df_all) 
-                n_entropy = calculate_entropy(df_all)
-                p = len(p_exmp)/len(df_all)
-                avg_entropy = p*p_entropy + (1-p)*n_entropy
-                entropyes[el] = avg_entropy
+            p_exmp = df_all[df_all[el]==1]
+            n_exmp = df_all[df_all[el]==0]
+            p_entropy = calculate_entropy(df_all) 
+            n_entropy = calculate_entropy(df_all)
+            p = len(p_exmp)/len(df_all)
+            avg_entropy = p*p_entropy + (1-p)*n_entropy
+            entropyes[el] = avg_entropy
         #fix this so it gets a random feature if more than one min features.
         print(entropyes)
         return sorted(entropyes.items(),key=lambda x: x[1])[0][0]
@@ -55,7 +58,7 @@ def test():
     df = pd.read_csv('market_data.csv')
     df_train = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][:int(len(df)*0.8)]
     df_test = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][int(len(df)*0.8):].values.tolist()
-    # print(df_train['ExCl'])
+    # print(df_train['ExCl'].value_counts().idxmax())
     feature = Tree.pick_best_feature(df_train)
     root = Tree(feature)
     root.build_tree(df_train)
