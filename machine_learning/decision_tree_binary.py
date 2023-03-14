@@ -42,8 +42,8 @@ class Tree:
             #calculate dependent variable entropy for explanatory feature being possitive/negative
             p_exmp = df_all[df_all[el]==1]
             n_exmp = df_all[df_all[el]==0]
-            p_entropy = calculate_entropy(df_all) 
-            n_entropy = calculate_entropy(df_all)
+            p_entropy = calculate_entropy(p_exmp) 
+            n_entropy = calculate_entropy(n_exmp)
             p = len(p_exmp)/len(df_all)
             avg_entropy = p*p_entropy + (1-p)*n_entropy
             entropyes[el] = avg_entropy
