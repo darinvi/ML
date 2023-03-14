@@ -2,56 +2,54 @@ import pdb
 import math
 import pandas as pd
 import numpy as np
-
+from collections import deque
 
 class Tree:
+
+    used_features = deque([])
+
     def __init__(self,feature,value=None):
         self.feature = feature
-        print(self.feature ,'da')
         self.value = value
         self.left_child = None
         self.right_child = None
-    
+        Tree.used_features.appendleft(self.feature)    
 
-    def buld_tree(self,df):
+    def build_tree(self,df):
         # p- positive, n- negative
-        if len(df['D2'].unique())==1:
+        if len(df[df.columns[-1]].unique())==1:
             #make leaf node
-            self.value = df['D2'].unique()[0]
+            self.value = df[df.columns[-1]].unique()[0]
             return
         n_subset = df[df[self.feature]==0]
         p_subset = df[df[self.feature]==1]
         n_best = Tree.pick_best_feature(n_subset)
-        print(n_best)
         p_best = Tree.pick_best_feature(p_subset)
-        print(p_best)
-        self.left_child = Tree(n_best)
-        self.right_child = Tree(p_best)
+        self.left_child = Tree(n_best).build_tree(n_subset)
+        self.right_child = Tree(p_best).build_tree(p_subset)
 
     @staticmethod
-    def pick_best_feature(df_tr):
-        def calculate_entropy(test_df,el):
-            print(el)
-            p = len(test_df[test_df['D2']==1])/len(test_df)
-            entropy = - p*math.log(p,2) - (1-p)*math.log((1-p),2)
+    def pick_best_feature(df_all):
+
+        def calculate_entropy(df_all):
+            p = len(df_all[df_all[df_all.columns[-1]]==1])/len(df_all)
+            entropy = - p*math.log(p+0.000001,2) - (1-p)*math.log((1-p)+0.000001,2)
             return entropy
-        
+    
         entropyes = {}
     
-        for el in list(df_tr.columns)[:-1]:
+        for el in list(df_all.columns)[:-1]:
             #calculate dependent variable entropy for explanatory feature being possitive/negative
-            p_exmp = df_tr[df_tr[el]==1]
-            # print(el)
-            n_exmp = df_tr[df_tr[el]==0]
-            print(len(p_exmp))
-            print(p_exmp.head())
-            print(len(n_exmp))
-            print(n_exmp.head())
-            p_entropy = calculate_entropy(p_exmp,el)
-            n_entropy = calculate_entropy(n_exmp,el)
-            avg_entropy = len(p_exmp)/len(df_tr)*p_entropy + len(n_exmp)/len(df_tr)*n_entropy
-            entropyes[el] = avg_entropy
+            if el not in Tree.used_features:
+                p_exmp = df_all[df_all[el]==1]
+                n_exmp = df_all[df_all[el]==0]
+                p_entropy = calculate_entropy(df_all) 
+                n_entropy = calculate_entropy(df_all)
+                p = len(p_exmp)/len(df_all)
+                avg_entropy = p*p_entropy + (1-p)*n_entropy
+                entropyes[el] = avg_entropy
         #fix this so it gets a random feature if more than one min features.
+        print(entropyes)
         return sorted(entropyes.items(),key=lambda x: x[1])[0][0]
 
 
@@ -60,10 +58,10 @@ def test():
     df = pd.read_csv('market_data.csv')
     df_train = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][:int(len(df)*0.8)]
     df_test = df[['Held_Open','Trend_bool','RVOL_bool','Gap_bool','ExCl','D2']][int(len(df)*0.8):].values.tolist()
-
+    # print(df_train['ExCl'])
     feature = Tree.pick_best_feature(df_train)
     root = Tree(feature)
-    root.buld_tree(df_train)
+    root.build_tree(df_train)
     print(root.__class__)
     print(root.left_child.feature)
 
@@ -99,3 +97,7 @@ test()
 # example_list = [34,25,67,65,3,1,23,4,5,67,89,10]
 # for example in example_list:
 #     root.insert(example)
+
+# a = np.array([1,0,0,1,1])
+# b = np.array([0,1,0,0,1])
+# print(a == b)
