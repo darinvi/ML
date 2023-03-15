@@ -1,7 +1,5 @@
-import pdb
 import math
 import pandas as pd
-import numpy as np
 
 class Tree:
 
@@ -19,8 +17,11 @@ class Tree:
         if len(df[y_val].unique())==1:
             self.value = df[y_val].unique()[0]
             return
+        if len(df[self.feature].unique())==1:
+            self.value = df[y_val].value_counts().idxmax()
+            return
         if len(df)<=50 and len(df[df[y_val]==0])!=len(df[df[y_val]==1]):
-            self.value = sorted(df[y_val].value_counts().idxmax())
+            self.value = df[y_val].value_counts().idxmax()
             return
         if len(df)<=50:
             self.value = 0
@@ -37,18 +38,19 @@ class Tree:
 
         def calculate_entropy(df_filtered):
             #p- proportion of y-values equal to 1 comapred to all y-values
-            p = len(df_filtered[df_filtered[df_filtered.columns[-1]]==1])/len(df_filtered) if len(df_filtered)!=0 else 0
+            y_val = df_filtered.columns[-1]
+            p = len(df_filtered[df_filtered[y_val]==1])/len(df_filtered) if len(df_filtered)!=0 else 0
             small = 0.000000000000001
             entropy = - p*math.log(p+small,2) - (1-p)*math.log((1-p)+small,2)
             return entropy
     
-        entropyes = {}
+        entropies = {}
     
         for col in list(df.columns)[:-1]:
             #calculate dependent variable entropy for explanatory feature being possitive/negative
             if col == previos_best:
                 continue
-            elif col != previos_best and len(df[col].unique())>1:
+            elif len(df[col].unique())>1:
                 p_exmp = df[df[col]==1]
                 n_exmp = df[df[col]==0]
                 p_entropy = calculate_entropy(p_exmp) 
@@ -59,9 +61,9 @@ class Tree:
                 #     quit()
             else:
                 avg_entropy = calculate_entropy(df)
-            entropyes[col] = avg_entropy
+            entropies[col] = avg_entropy
         #fix this so it gets a random feature if more than one min features.
-        return sorted(entropyes.items(),key=lambda x: x[1])[0][0]
+        return sorted(entropies.items(),key=lambda x: x[1])[0][0]
 
 
 
@@ -74,41 +76,7 @@ def test():
     root = Tree(feature)
     root.build_tree(df_train)
     print(root.__class__)
-    print(root.left_child.feature)
-    print('wazaa')
+    print(root.left_child)
 test()
 
 
-
-# class Tree:
-#     def __init__(self,key):
-#         self.key = key
-#         self.left_child = None
-#         self.right_child = None
-
-#     def insert(self,data):
-#         if self.key is None:
-#             self.key = data
-#             return
-#         if self.key == data:
-#             return
-#         if self.key > data:
-#             if self.left_child:
-#                 self.left_child.insert(data)
-#             else:
-#                 self.left_child = Tree(data)
-#         else:
-#             if self.right_child:
-#                 self.right_child.insert(data)
-#             else:
-#                 self.right_child = Tree(data)
-
-# root = Tree(None)
-
-# example_list = [34,25,67,65,3,1,23,4,5,67,89,10]
-# for example in example_list:
-#     root.insert(example)
-
-# a = np.array([1,0,0,1,1])
-# b = np.array([0,1,0,0,1])
-# print(a == b)
