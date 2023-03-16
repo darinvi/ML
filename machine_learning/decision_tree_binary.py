@@ -8,9 +8,11 @@ class Tree:
         self.left_child = None
         self.right_child = None
         #if val then it's leaf node
+        self.dft = None
         self.value = value
 
     def build_tree(self,df):
+        self.dft = df
         y_val = df.columns[-1]
         # p- positive, n- negative
         #conditions to make leaf node
@@ -30,8 +32,10 @@ class Tree:
         p_subset = df[df[self.feature]==1]
         n_best = Tree.pick_best_feature(n_subset,self.feature)
         p_best = Tree.pick_best_feature(p_subset,self.feature)
-        self.left_child = Tree(n_best).build_tree(n_subset)
-        self.right_child = Tree(p_best).build_tree(p_subset)
+        self.left_child = Tree(n_best)
+        self.right_child = Tree(p_best)
+        self.left_child.build_tree(n_subset)
+        self.left_child.build_tree(p_subset)
 
     @staticmethod
     def pick_best_feature(df,previos_best):
@@ -76,7 +80,8 @@ def test():
     root = Tree(feature)
     root.build_tree(df_train)
     print(root.__class__)
-    print(root.left_child)
+    print(root.left_child.left_child.left_child.left_child.dft)
+    # print(root.left_child.left_child.right_child.dft)
 test()
 
 
