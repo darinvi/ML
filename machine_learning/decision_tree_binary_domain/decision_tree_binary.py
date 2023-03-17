@@ -35,7 +35,7 @@ class Tree:
         self.left_child = Tree(n_best)
         self.right_child = Tree(p_best)
         self.left_child.build_tree(n_subset)
-        self.left_child.build_tree(p_subset)
+        self.right_child.build_tree(p_subset)
 
     @staticmethod
     def pick_best_feature(df,previos_best):
@@ -79,9 +79,16 @@ def test():
     feature = Tree.pick_best_feature(df_train,None)
     root = Tree(feature)
     root.build_tree(df_train)
-    print(root.__class__)
-    print(root.left_child.left_child.left_child.left_child.dft)
-    # print(root.left_child.left_child.right_child.dft)
-test()
+    grr = root.left_child.left_child.left_child.left_child
+    print(root.left_child.left_child.left_child.left_child.feature)
+    # print(root.left_child.left_child.left_child.left_child.feature)
+    return grr
+grr = test()
 
+print(grr.left_child.left_child)
+# print(grr[grr['Trend_bool']==1])
+# # print(grr[grr['Trend_bool']==0,grr['D2']==1])
 
+def tree_children(obj):
+    lchild = obj.left_child
+    rchild = obj.right_child
